@@ -42,6 +42,7 @@ class Collection {
         this.items = items.map((item) => {
             if (path.extname(item) === ".ics")
                 return new ICalendar(path.join(this.path, item))
+            else throw Error(`unrecognized file extension for ${item}`)
         })
     }
 }
@@ -50,7 +51,44 @@ class ICalendar {
     constructor(itemPath) {
         if (!fs.statSync(itemPath).isFile()) throw Error()
         this.path = itemPath
-        this.raw = ical.sync.parseICS(fs.readFileSync(this.path).toString())
+        const parsed = ical.sync.parseICS(fs.readFileSync(this.path).toString())
+        this.objects = []
+        for (const id in parsed) {
+            const obj = parsed[id]
+            switch (obj.type) {
+                case "VTODO":
+                    this.objects.push(new Task(obj))
+                    break
+                case "VTIMEZONE":
+                    this.objects.push(new TimeZone(obj))
+                    break
+                case "VEVENT":
+                    this.objects.push(new Event(obj))
+                    break
+                default:
+                    throw Error(`unrecognized object of type ${obj.type}`)
+            }
+        }
+    }
+}
+
+class Event {
+    constructor(data) {
+        this.raw = data;
+    }
+}
+
+
+class Task {
+    constructor(data) {
+        this.raw = data;
+    }
+}
+
+
+class TimeZone {
+    constructor(data) {
+        this.raw = data;
     }
 }
 
