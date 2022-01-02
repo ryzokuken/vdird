@@ -1,0 +1,19 @@
+{
+  "name": "vdirreader",
+  "version": "0.1.0",
+  "description": "",
+  "main": "dist/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ryzokuken/vdirreader.git"
+  },
+  "author": "Ujjwal Sharma <ryzokuken@disroot.org>",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/ryzokuken/vdirreader/issues"
+  },
+  "homepage": "https://github.com/ryzokuken/vdirreader#readme"
+}
