@@ -2,6 +2,8 @@ import fs from "fs"
 import path from "path"
 import util from "util"
 
+import ical from "node-ical"
+
 class VDir {
     constructor(vDirPath) {
         if (!fs.statSync(vDirPath).isDirectory()) throw Error()
@@ -37,8 +39,19 @@ class Collection {
         } else {
             this.displayName = null
         }
-        this.items = items;
+        this.items = items.map((item) => {
+            if (path.extname(item) === ".ics")
+                return new ICalendar(path.join(this.path, item))
+        })
     }
 }
 
-console.log(util.inspect(new VDir(process.argv[2]), { depth: 3 }))
+class ICalendar {
+    constructor(itemPath) {
+        if (!fs.statSync(itemPath).isFile()) throw Error()
+        this.path = itemPath
+        this.raw = ical.sync.parseICS(fs.readFileSync(this.path).toString())
+    }
+}
+
+console.log(util.inspect(new VDir(process.argv[2]), { depth: 6 }))

@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/ryzokuken/vdirreader/issues"
   },
-  "homepage": "https://github.com/ryzokuken/vdirreader#readme"
+  "homepage": "https://github.com/ryzokuken/vdirreader#readme",
+  "dependencies": {
+    "node-ical": "^0.14.1"
+  }
 }
