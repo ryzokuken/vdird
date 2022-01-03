@@ -3,6 +3,7 @@ import path from "path"
 import util from "util"
 
 import ical from "node-ical"
+import { Temporal, toTemporalInstant } from "@js-temporal/polyfill"
 
 class VDir {
     constructor(vDirPath) {
@@ -55,15 +56,21 @@ class ICalendar {
         this.objects = []
         for (const id in parsed) {
             const obj = parsed[id]
+            if (obj.uid && obj.uid !== id) console.warn("uid mismatch")
+            this.objects.push(obj.uid)
             switch (obj.type) {
                 case "VTODO":
-                    this.objects.push(new Task(obj))
+                    taskRegistry.insert(new Task(obj))
                     break
                 case "VTIMEZONE":
-                    this.objects.push(new TimeZone(obj))
+                    try {
+                        Temporal.TimeZone.from(obj.tzid) // check if tzid is valid
+                    } catch {
+                        throw Error(`invalid tzid ${tzid}`)
+                    }
                     break
                 case "VEVENT":
-                    this.objects.push(new Event(obj))
+                    eventRegistry.insert(new Event(obj))
                     break
                 default:
                     throw Error(`unrecognized object of type ${obj.type}`)
@@ -72,24 +79,50 @@ class ICalendar {
     }
 }
 
+function processDate(date) {
+    const { tz } = date
+    return toTemporalInstant.call(date).toZonedDateTimeISO(tz || "Etc/UTC")
+}
+
 class Event {
     constructor(data) {
-        this.raw = data;
+        this.raw = data
+        this.uid = data.uid
+        this.start = processDate(data.start)
+        this.end = processDate(data.end)
     }
 }
 
+class Registry {
+    constructor() {
+        this.data = new Map()
+    }
+
+    insert(item) {
+        if (item.uid === undefined) throw Error("event has no uid")
+        this.data.set(item.uid, item)
+    }
+}
+
+const eventRegistry = new Registry()
+const taskRegistry = new Registry()
+// const timeZoneRegistry = new Registry()
 
 class Task {
     constructor(data) {
-        this.raw = data;
+        this.raw = data
+        this.uid = data.uid
     }
 }
-
 
 class TimeZone {
     constructor(data) {
-        this.raw = data;
+        this.raw = data
     }
 }
 
-console.log(util.inspect(new VDir(process.argv[2]), { depth: 6 }))
+const vdir = new VDir(process.argv[2])
+console.log(vdir)
+console.log(eventRegistry)
+console.log(taskRegistry)
+// console.log(timeZoneRegistry)
