@@ -1,8 +1,8 @@
 import fs from "fs"
 import nodePath from "path"
 
-import ical from "node-ical"
-import { Temporal, toTemporalInstant } from "@js-temporal/polyfill"
+import ICAL from "ical.js"
+import { Temporal } from "@js-temporal/polyfill"
 
 class VDir {
     /**
@@ -57,6 +57,41 @@ class Collection {
     }
 }
 
+function processComponent(component) {
+    const [name, properties, subcomponents] = component
+    switch (name) {
+        case "vcalendar":
+            subcomponents.forEach((subcomponent) =>
+                processComponent(subcomponent)
+            )
+            break
+        case "vevent":
+            eventRegistry.insert(new Event(properties))
+            break
+        case "vtodo":
+            taskRegistry.insert(new Task(properties))
+            break
+        case "vtimezone":
+            processTimeZone(properties)
+            break
+        default:
+            throw Error(`unexpected component: ${name}`)
+    }
+}
+
+function processTimeZone(props) {
+    props.forEach((prop) => {
+        const [name, params, type, value] = prop
+        if (name === "tzid") {
+            try {
+                new Temporal.TimeZone(value)
+            } catch {
+                throw Error(`invalid tzid: ${value}`)
+            }
+        }
+    })
+}
+
 class ICalendar {
     /**
      * @param {string} path
@@ -64,30 +99,8 @@ class ICalendar {
     constructor(path) {
         if (!fs.statSync(path).isFile()) throw Error()
         this.path = path
-        const parsed = ical.sync.parseICS(fs.readFileSync(this.path).toString())
-        this.objects = []
-        for (const id in parsed) {
-            const obj = parsed[id]
-            if (obj.uid && obj.uid !== id) console.warn("uid mismatch")
-            this.objects.push(obj.uid)
-            switch (obj.type) {
-                case "VTODO":
-                    taskRegistry.insert(new Task(obj))
-                    break
-                case "VTIMEZONE":
-                    try {
-                        Temporal.TimeZone.from(obj.tzid) // check if tzid is valid
-                    } catch {
-                        throw Error(`invalid tzid ${obj.tzid}`)
-                    }
-                    break
-                case "VEVENT":
-                    eventRegistry.insert(new Event(obj))
-                    break
-                default:
-                    throw Error(`unrecognized object of type ${obj.type}`)
-            }
-        }
+        const parsed = ICAL.parse(fs.readFileSync(this.path).toString())
+        processComponent(parsed)
     }
 }
 
@@ -96,26 +109,54 @@ class ICalendar {
  * @returns {Temporal.ZonedDateTime}
  */
 function processDate(date) {
-    const { tz } = date
-    return toTemporalInstant.call(date).toZonedDateTimeISO(tz || "Etc/UTC")
+    const [name, params, type, value] = date
+    if (type !== "date-time") throw Error(`invalid type: ${type}`)
+    const tz = params.tzid || "Etc/UTC"
+    try {
+        return Temporal.PlainDateTime.from(value).toZonedDateTime(tz)
+    } catch {
+        return Temporal.Instant.from(value).toZonedDateTimeISO(tz)
+    }
 }
 
 class Event {
     /**
      * @param {ical.VEvent} data
      */
-    constructor(data) {
-        this.raw = data
-        this.uid = data.uid
-        this.start = processDate(data.start)
-        this.end = processDate(data.end)
+    constructor(props) {
+        this.raw = props
+        props.forEach((prop) => {
+            const [name, params, type, value] = prop
+            switch (name) {
+                case "uid":
+                    this.uid = value
+                    break
+                case "dtstart":
+                    this.start = processDate(prop)
+                case "dtend":
+                    this.end = processDate(prop)
+                    break
+            }
+        })
     }
 }
 
 class Task {
-    constructor(data) {
-        this.raw = data
-        this.uid = data.uid
+    constructor(props) {
+        this.raw = props
+        props.forEach((prop) => {
+            const [name, params, type, value] = prop
+            switch (name) {
+                case "uid":
+                    this.uid = value
+                    break
+                case "dtstart":
+                    this.start = processDate(prop)
+                case "dtend":
+                    this.end = processDate(prop)
+                    break
+            }
+        })
     }
 }
 

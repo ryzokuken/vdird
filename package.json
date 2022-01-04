@@ -19,6 +19,7 @@
   "homepage": "https://github.com/ryzokuken/vdirreader#readme",
   "dependencies": {
     "@js-temporal/polyfill": "^0.3.0",
+    "ical.js": "github:mozilla-comm/ical.js",
     "node-ical": "^0.14.1"
   }
 }
