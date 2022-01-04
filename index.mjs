@@ -5,9 +5,6 @@ import ICAL from "ical.js"
 import { Temporal } from "@js-temporal/polyfill"
 
 class VDir {
-    /**
-    @param {string} path
-    */
     constructor(path) {
         if (!fs.statSync(path).isDirectory()) throw Error()
         this.path = path
@@ -24,10 +21,6 @@ class VDir {
 }
 
 class Collection {
-    /**
-     * @param {string} id
-     * @param {string} path
-     */
     constructor(id, path) {
         this.id = id
         if (!fs.statSync(path).isDirectory()) throw Error()
@@ -93,9 +86,6 @@ function processTimeZone(props) {
 }
 
 class ICalendar {
-    /**
-     * @param {string} path
-     */
     constructor(path) {
         if (!fs.statSync(path).isFile()) throw Error()
         this.path = path
@@ -104,10 +94,6 @@ class ICalendar {
     }
 }
 
-/**
- * @param {ical.DateWithTimeZone} date
- * @returns {Temporal.ZonedDateTime}
- */
 function processDate(date) {
     const [name, params, type, value] = date
     if (type !== "date-time") throw Error(`invalid type: ${type}`)
@@ -120,9 +106,6 @@ function processDate(date) {
 }
 
 class Event {
-    /**
-     * @param {ical.VEvent} data
-     */
     constructor(props) {
         this.raw = props
         props.forEach((prop) => {
@@ -160,20 +143,11 @@ class Task {
     }
 }
 
-/**
- * @template {{uid: string}} Item
- */
 class Registry {
     constructor() {
-        /**
-         * @type {Map<string, Item>}
-         */
         this.data = new Map()
     }
 
-    /**
-     * @param {Item} item
-     */
     insert(item) {
         if (item.uid === undefined) throw Error("event has no uid")
         this.data.set(item.uid, item)
