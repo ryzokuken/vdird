@@ -6,7 +6,7 @@ import { Temporal } from "@js-temporal/polyfill"
 
 class VDir {
     constructor(path) {
-        if (!fs.statSync(path).isDirectory()) throw Error()
+        if (!fs.statSync(path).isDirectory()) throw Error() // TODO: add a better error code
         this.path = path
         this.collections = fs
             .readdirSync(this.path)
@@ -43,11 +43,12 @@ class Collection {
             this.displayName = null
         }
         items.forEach((item) => {
+            const filePath = nodePath.join(this.path, item)
+            if (!fs.statSync(filePath).isFile()) throw Error() // TODO: add a better error code
             if (nodePath.extname(item) === ".ics") {
-                const filePath = nodePath.join(this.path, item)
-                if (!fs.statSync(filePath).isFile()) throw Error()
-                const parsed = ICAL.parse(fs.readFileSync(filePath).toString())
-                processComponent(parsed)
+                processComponent(
+                    ICAL.parse(fs.readFileSync(filePath).toString())
+                )
             } else throw Error(`unrecognized file extension for ${item}`)
         })
     }
@@ -57,9 +58,7 @@ function processComponent(component) {
     const [name, properties, subcomponents] = component
     switch (name) {
         case "vcalendar":
-            subcomponents.forEach((subcomponent) =>
-                processComponent(subcomponent)
-            )
+            subcomponents.forEach((component) => processComponent(component))
             break
         case "vevent":
             eventRegistry.insert(new Event(properties))
