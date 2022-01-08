@@ -4,9 +4,22 @@ import nodePath from "path"
 import ICAL from "ical.js"
 import { Temporal } from "@js-temporal/polyfill"
 
+class Registry {
+    constructor() {
+        this.data = new Map()
+    }
+
+    insert(item) {
+        if (item.uid === undefined) throw Error("event has no uid")
+        this.data.set(item.uid, item)
+    }
+}
+
 class VDir {
     constructor(path) {
         if (!fs.statSync(path).isDirectory()) throw Error() // TODO: add a better error code
+        this.eventRegistry = new Registry()
+        this.taskRegistry = new Registry()
         this.path = path
         this.collections = fs
             .readdirSync(this.path)
@@ -14,14 +27,16 @@ class VDir {
                 (collection) =>
                     new Collection(
                         collection,
-                        nodePath.join(this.path, collection)
+                        nodePath.join(this.path, collection),
+                        this.eventRegistry,
+                        this.taskRegistry
                     )
             )
     }
 }
 
 class Collection {
-    constructor(id, path) {
+    constructor(id, path, eventRegistry, taskRegistry) {
         this.id = id
         if (!fs.statSync(path).isDirectory()) throw Error()
         this.path = path
@@ -47,18 +62,22 @@ class Collection {
             if (!fs.statSync(filePath).isFile()) throw Error() // TODO: add a better error code
             if (nodePath.extname(item) === ".ics") {
                 processComponent(
-                    ICAL.parse(fs.readFileSync(filePath).toString())
+                    ICAL.parse(fs.readFileSync(filePath).toString()),
+                    eventRegistry,
+                    taskRegistry
                 )
             } else throw Error(`unrecognized file extension for ${item}`)
         })
     }
 }
 
-function processComponent(component) {
+function processComponent(component, eventRegistry, taskRegistry) {
     const [name, properties, subcomponents] = component
     switch (name) {
         case "vcalendar":
-            subcomponents.forEach((component) => processComponent(component))
+            subcomponents.forEach((component) =>
+                processComponent(component, eventRegistry, taskRegistry)
+            )
             break
         case "vevent":
             eventRegistry.insert(new Event(properties))
@@ -142,21 +161,5 @@ class Task {
     }
 }
 
-class Registry {
-    constructor() {
-        this.data = new Map()
-    }
-
-    insert(item) {
-        if (item.uid === undefined) throw Error("event has no uid")
-        this.data.set(item.uid, item)
-    }
-}
-
-const eventRegistry = new Registry()
-const taskRegistry = new Registry()
-
 const vdir = new VDir(process.argv[2])
 console.log((await import("util")).inspect(vdir, { depth: 5 }))
-console.log(eventRegistry)
-console.log(taskRegistry)
