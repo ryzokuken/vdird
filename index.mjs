@@ -96,12 +96,18 @@ class ICalendar {
 
 function processDate(date) {
     const [name, params, type, value] = date
-    if (type !== "date-time") throw Error(`invalid type: ${type}`)
-    const tz = params.tzid || "Etc/UTC"
-    try {
-        return Temporal.PlainDateTime.from(value).toZonedDateTime(tz)
-    } catch {
-        return Temporal.Instant.from(value).toZonedDateTimeISO(tz)
+    switch (type) {
+        case "date":
+            return Temporal.PlainDate.from(value)
+        case "date-time":
+            const tz = params.tzid || "Etc/UTC"
+            try {
+                return Temporal.PlainDateTime.from(value).toZonedDateTime(tz)
+            } catch {
+                return Temporal.Instant.from(value).toZonedDateTimeISO(tz)
+            }
+        default:
+            throw Error(`invalid type: ${type}`)
     }
 }
 
