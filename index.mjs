@@ -42,10 +42,13 @@ class Collection {
         } else {
             this.displayName = null
         }
-        this.items = items.map((item) => {
-            if (nodePath.extname(item) === ".ics")
-                return new ICalendar(nodePath.join(this.path, item))
-            else throw Error(`unrecognized file extension for ${item}`)
+        items.forEach((item) => {
+            if (nodePath.extname(item) === ".ics") {
+                const filePath = nodePath.join(this.path, item)
+                if (!fs.statSync(filePath).isFile()) throw Error()
+                const parsed = ICAL.parse(fs.readFileSync(filePath).toString())
+                processComponent(parsed)
+            } else throw Error(`unrecognized file extension for ${item}`)
         })
     }
 }
@@ -83,15 +86,6 @@ function processTimeZone(props) {
             }
         }
     })
-}
-
-class ICalendar {
-    constructor(path) {
-        if (!fs.statSync(path).isFile()) throw Error()
-        this.path = path
-        const parsed = ICAL.parse(fs.readFileSync(this.path).toString())
-        processComponent(parsed)
-    }
 }
 
 function processDate(date) {
@@ -164,6 +158,6 @@ const eventRegistry = new Registry()
 const taskRegistry = new Registry()
 
 const vdir = new VDir(process.argv[2])
-console.log(vdir)
+console.log((await import("util")).inspect(vdir, { depth: 5 }))
 console.log(eventRegistry)
 console.log(taskRegistry)
