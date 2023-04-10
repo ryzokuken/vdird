@@ -4,7 +4,9 @@ import nodePath from "path"
 import ICAL from "ical.js"
 import { Temporal } from "@js-temporal/polyfill"
 
-class Registry {
+class Registry<T> {
+    data: Map<string, T>
+
     constructor() {
         this.data = new Map()
     }
@@ -16,6 +18,11 @@ class Registry {
 }
 
 class VDir {
+    eventRegistry: Registry<Event>
+    taskRegistry: Registry<Task>
+    path: string
+    collections: Collection[]
+
     constructor(path) {
         if (!fs.statSync(path).isDirectory()) throw Error() // TODO: add a better error code
         this.eventRegistry = new Registry()
@@ -36,6 +43,11 @@ class VDir {
 }
 
 class Collection {
+    id: string
+    path: string
+    color: string
+    displayName: string
+
     constructor(id, path, eventRegistry, taskRegistry) {
         this.id = id
         if (!fs.statSync(path).isDirectory()) throw Error()
@@ -124,6 +136,11 @@ function processDate(date) {
 }
 
 class Event {
+    uid: string
+    start: Temporal.ZonedDateTime
+    end: Temporal.ZonedDateTime
+    raw: object
+
     constructor(props) {
         this.raw = props
         props.forEach((prop) => {
@@ -143,6 +160,11 @@ class Event {
 }
 
 class Task {
+    uid: string
+    start: Temporal.ZonedDateTime
+    end: Temporal.ZonedDateTime
+    raw: object
+
     constructor(props) {
         this.raw = props
         props.forEach((prop) => {
