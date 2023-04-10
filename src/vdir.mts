@@ -30,7 +30,7 @@ function processComponent(
         case "vcalendar":
             component
                 .getAllSubcomponents()
-                .forEach((c) =>
+                .forEach((c: ICAL.Component) =>
                     processComponent(c, eventRegistry, taskRegistry)
                 )
             break
@@ -48,7 +48,7 @@ function processComponent(
     }
 }
 
-function processTimeZone(props) {
+function processTimeZone(props: ICAL.Property[]) {
     props.forEach((prop) => {
         const value = prop.getFirstValue()
         if (prop.name === "tzid") {

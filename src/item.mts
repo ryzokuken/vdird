@@ -20,8 +20,8 @@ function processDate(prop) {
 
 export default class Item {
     uid: string
-    start: Temporal.ZonedDateTime
-    end: Temporal.ZonedDateTime
+    start: Temporal.ZonedDateTime | Temporal.PlainDate
+    end: Temporal.ZonedDateTime | Temporal.PlainDate
     raw: object
 
     constructor(props) {
