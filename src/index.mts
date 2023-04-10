@@ -23,7 +23,7 @@ class VDir {
     path: string
     collections: Collection[]
 
-    constructor(path) {
+    constructor(path: string) {
         if (!fs.statSync(path).isDirectory()) throw Error() // TODO: add a better error code
         this.eventRegistry = new Registry()
         this.taskRegistry = new Registry()
@@ -45,10 +45,10 @@ class VDir {
 class Collection {
     id: string
     path: string
-    color: string
-    displayName: string
+    color?: string
+    displayName?: string
 
-    constructor(id, path, eventRegistry, taskRegistry) {
+    constructor(id: string, path: string, eventRegistry: Registry, taskRegistry: Registry) {
         this.id = id
         if (!fs.statSync(path).isDirectory()) throw Error()
         this.path = path
@@ -59,7 +59,7 @@ class Collection {
                 .toString()
             items = items.filter((item) => item != "color")
         } else {
-            this.color = null
+            this.color = undefined
         }
         if (items.includes("displayname")) {
             this.displayName = fs
@@ -67,7 +67,7 @@ class Collection {
                 .toString()
             items = items.filter((item) => item != "displayname")
         } else {
-            this.displayName = null
+            this.displayName = undefined
         }
         items.forEach((item) => {
             const filePath = nodePath.join(this.path, item)
@@ -83,7 +83,7 @@ class Collection {
     }
 }
 
-function processComponent(component, eventRegistry, taskRegistry) {
+function processComponent(component: any, eventRegistry: Registry, taskRegistry: Registry) {
     const [name, properties, subcomponents] = component
     switch (name) {
         case "vcalendar":
