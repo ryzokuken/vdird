@@ -1,13 +1,13 @@
 import { Temporal } from "@js-temporal/polyfill"
 
-
-function processDate(date) {
-    const [name, params, type, value] = date
-    switch (type) {
+function processDate(prop) {
+    const type = prop.type
+    const value = prop.getFirstValue()
+    switch (prop.type) {
         case "date":
             return Temporal.PlainDate.from(value)
         case "date-time":
-            const tz = params.tzid || "Etc/UTC"
+            const tz = prop.getParameter("tzid") || "Etc/UTC"
             try {
                 return Temporal.PlainDateTime.from(value).toZonedDateTime(tz)
             } catch {
@@ -27,10 +27,10 @@ export default class Item {
     constructor(props) {
         this.raw = props
         props.forEach((prop) => {
-            const [name, params, type, value] = prop
-            switch (name) {
+            prop.toString()
+            switch (prop.name) {
                 case "uid":
-                    this.uid = value
+                    this.uid = prop.getFirstValue()
                     break
                 case "dtstart":
                     this.start = processDate(prop)

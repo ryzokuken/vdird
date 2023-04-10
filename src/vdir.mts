@@ -19,13 +19,20 @@ class Registry {
     }
 }
 
-function processComponent(component: any, eventRegistry: Registry, taskRegistry: Registry) {
-    const [name, properties, subcomponents] = component
+function processComponent(
+    component: ICAL.Component,
+    eventRegistry: Registry,
+    taskRegistry: Registry
+) {
+    const name = component.name
+    const properties = component.getAllProperties()
     switch (name) {
         case "vcalendar":
-            subcomponents.forEach((component) =>
-                processComponent(component, eventRegistry, taskRegistry)
-            )
+            component
+                .getAllSubcomponents()
+                .forEach((c) =>
+                    processComponent(c, eventRegistry, taskRegistry)
+                )
             break
         case "vevent":
             eventRegistry.insert(new Item(properties))
@@ -43,8 +50,8 @@ function processComponent(component: any, eventRegistry: Registry, taskRegistry:
 
 function processTimeZone(props) {
     props.forEach((prop) => {
-        const [name, params, type, value] = prop
-        if (name === "tzid") {
+        const value = prop.getFirstValue()
+        if (prop.name === "tzid") {
             try {
                 new Temporal.TimeZone(value)
             } catch {
@@ -54,14 +61,18 @@ function processTimeZone(props) {
     })
 }
 
-
 class Collection {
     id: string
     path: string
     color?: string
     displayName?: string
 
-    constructor(id: string, path: string, eventRegistry: Registry, taskRegistry: Registry) {
+    constructor(
+        id: string,
+        path: string,
+        eventRegistry: Registry,
+        taskRegistry: Registry
+    ) {
         this.id = id
         if (!fs.statSync(path).isDirectory()) throw Error()
         this.path = path
@@ -86,11 +97,11 @@ class Collection {
             const filePath = nodePath.join(this.path, item)
             if (!fs.statSync(filePath).isFile()) throw Error() // TODO: add a better error code
             if (nodePath.extname(item) === ".ics") {
-                processComponent(
-                    ICAL.parse(fs.readFileSync(filePath).toString()),
-                    eventRegistry,
-                    taskRegistry
+                const jCalData = ICAL.parse(
+                    fs.readFileSync(filePath).toString()
                 )
+                const component = new ICAL.Component(jCalData)
+                processComponent(component, eventRegistry, taskRegistry)
             } else throw Error(`unrecognized file extension for ${item}`)
         })
     }
