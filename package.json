@@ -2,11 +2,11 @@
   "name": "vdirreader",
   "version": "0.1.0",
   "description": "",
-  "main": "dist/index.js",
+  "main": "dist/index.mjs",
   "type": "module",
   "scripts": {
     "build": "tsc",
-    "start": "node index.mjs",
+    "start": "node dist/index.mjs",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

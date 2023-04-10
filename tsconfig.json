@@ -1,11 +1,12 @@
 {
     "compilerOptions": {
+        "outDir": "dist",
         "target": "ESNext",
         "esModuleInterop": true,
         "module": "ESNext",
         "moduleResolution": "nodenext"
     },
-    "files": [
-        "index.mts"
+    "include": [
+        "src/*"
     ]
 }
