@@ -4,22 +4,22 @@ import nodePath from "path"
 import ICAL from "ical.js"
 import { Temporal } from "@js-temporal/polyfill"
 
-class Registry<T> {
-    data: Map<string, T>
+class Registry {
+    data: Map<string, Item>
 
     constructor() {
         this.data = new Map()
     }
 
-    insert(item) {
+    insert(item: Item) {
         if (item.uid === undefined) throw Error("event has no uid")
         this.data.set(item.uid, item)
     }
 }
 
 class VDir {
-    eventRegistry: Registry<Event>
-    taskRegistry: Registry<Task>
+    eventRegistry: Registry
+    taskRegistry: Registry
     path: string
     collections: Collection[]
 
@@ -92,10 +92,10 @@ function processComponent(component, eventRegistry, taskRegistry) {
             )
             break
         case "vevent":
-            eventRegistry.insert(new Event(properties))
+            eventRegistry.insert(new Item(properties))
             break
         case "vtodo":
-            taskRegistry.insert(new Task(properties))
+            taskRegistry.insert(new Item(properties))
             break
         case "vtimezone":
             processTimeZone(properties)
@@ -135,31 +135,7 @@ function processDate(date) {
     }
 }
 
-class Event {
-    uid: string
-    start: Temporal.ZonedDateTime
-    end: Temporal.ZonedDateTime
-    raw: object
-
-    constructor(props) {
-        this.raw = props
-        props.forEach((prop) => {
-            const [name, params, type, value] = prop
-            switch (name) {
-                case "uid":
-                    this.uid = value
-                    break
-                case "dtstart":
-                    this.start = processDate(prop)
-                case "dtend":
-                    this.end = processDate(prop)
-                    break
-            }
-        })
-    }
-}
-
-class Task {
+class Item {
     uid: string
     start: Temporal.ZonedDateTime
     end: Temporal.ZonedDateTime
