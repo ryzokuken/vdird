@@ -11,7 +11,10 @@ const vdir = new VDir(process.argv[2]);
 const start = "2000-01-01";
 const end = "2030-01-01";
 
-const requestListener = function (req, res) {
+const requestListener = function (
+  req: http.IncomingMessage,
+  res: http.ServerResponse
+) {
   res.setHeader("Content-Type", "application/json");
   switch (req.url) {
     case "/":
