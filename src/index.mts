@@ -21,6 +21,10 @@ const requestListener = function (
       res.writeHead(200);
       res.end(JSON.stringify(vdir));
       break;
+    case "/all/":
+      res.writeHead(200);
+      res.end(JSON.stringify(vdir.all()));
+      break;
     case "/between/":
       res.writeHead(200);
       res.end(JSON.stringify(vdir.between(start, end)));

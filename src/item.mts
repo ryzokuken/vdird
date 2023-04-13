@@ -35,6 +35,7 @@ export default class Item {
           break;
         case "dtstart":
           this.start = processDate(prop);
+          break;
         case "dtend":
           this.end = processDate(prop);
           break;
