@@ -99,7 +99,7 @@ class Collection {
             if (nodePath.extname(item) === ".ics") {
                 const jCalData = ICAL.parse(
                     fs.readFileSync(filePath).toString()
-                )
+                ) as Object[]
                 const component = new ICAL.Component(jCalData)
                 processComponent(component, eventRegistry, taskRegistry)
             } else throw Error(`unrecognized file extension for ${item}`)

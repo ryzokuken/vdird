@@ -1,6 +1,7 @@
 import { Temporal } from "@js-temporal/polyfill"
+import ICAL from "ical.js"
 
-function processDate(prop) {
+function processDate(prop: ICAL.Property) {
     const type = prop.type
     const value = prop.getFirstValue()
     switch (prop.type) {
@@ -24,7 +25,7 @@ export default class Item {
     end: Temporal.ZonedDateTime | Temporal.PlainDate
     raw: object
 
-    constructor(props) {
+    constructor(props: ICAL.Property[]) {
         this.raw = props
         props.forEach((prop) => {
             prop.toString()

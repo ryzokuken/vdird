@@ -4,9 +4,11 @@
         "target": "ESNext",
         "esModuleInterop": true,
         "module": "ESNext",
-        "moduleResolution": "nodenext"
+        "moduleResolution": "nodenext",
+        "strict": true
     },
     "include": [
-        "src/*"
+        "src/*",
+        "ical.d.ts"
     ]
 }
