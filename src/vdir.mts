@@ -131,6 +131,13 @@ export default class VDir {
             )
     }
 
+    all() {
+        return {
+            events: Array.from(this.eventRegistry.data.values()),
+            tasks: Array.from(this.taskRegistry.data.values()),
+        }
+    }
+
     between(start: string, end: string) {
         const sZDT = Temporal.PlainDateTime.from(start)
         const eZDT = Temporal.PlainDateTime.from(end)
