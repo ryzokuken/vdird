@@ -143,13 +143,13 @@ export default class VDir {
     const eZDT = Temporal.PlainDateTime.from(end);
     const events = Array.from(this.eventRegistry.data.values()).filter(
       (event) =>
-        Temporal.PlainDateTime.compare(sZDT, event.start) === -1 &&
-        Temporal.PlainDateTime.compare(event.end, eZDT) === -1
+        Temporal.PlainDateTime.compare(event.end, sZDT) === 1 ||
+        Temporal.PlainDateTime.compare(event.start, eZDT) === -1
     );
     const tasks = Array.from(this.taskRegistry.data.values()).filter(
       (task) =>
-        Temporal.ZonedDateTime.compare(sZDT, task.start) === -1 &&
-        Temporal.ZonedDateTime.compare(task.end, eZDT) === -1
+        Temporal.ZonedDateTime.compare(task.end, sZDT) === 1 ||
+        Temporal.ZonedDateTime.compare(task.start, eZDT) === -1
     );
     return { events, tasks };
   }
