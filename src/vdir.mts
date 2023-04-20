@@ -1,5 +1,6 @@
 import fs from "fs";
 import nodePath from "path";
+import assert from "assert";
 
 import ICAL from "ical.js";
 import { Temporal } from "@js-temporal/polyfill";
@@ -14,7 +15,7 @@ class Registry {
   }
 
   insert(item: Item) {
-    if (item.uid === undefined) throw Error("event has no uid");
+    assert(item.uid, 'item has no uid');
     this.data.set(item.uid, item);
   }
 }
@@ -44,11 +45,7 @@ function processTimeZone(props: ICAL.Property[]) {
   props.forEach((prop) => {
     const value = prop.getFirstValue();
     if (prop.name === "tzid") {
-      try {
-        new Temporal.TimeZone(value);
-      } catch {
-        throw Error(`invalid tzid: ${value}`);
-      }
+      assert.doesNotThrow(() => new Temporal.TimeZone(value), `invalid tzid: ${value}`)
     }
   });
 }
@@ -56,7 +53,7 @@ function processTimeZone(props: ICAL.Property[]) {
 function handleICS(content: string, eventRegistry: Registry, taskRegistry: Registry) {
   const jCalData = ICAL.parse(content);
   const component = new ICAL.Component(jCalData as object[]);
-  if (component.name !== 'vcalendar') throw new Error(); // TODO: Replace with asserts
+  assert.strictEqual(component.name, 'vcalendar', 'top level component must be "vcalendar"');
   component.getAllSubcomponents().forEach(component => processComponent(component, eventRegistry, taskRegistry));
 }
 
@@ -73,7 +70,7 @@ class Collection {
     taskRegistry: Registry
   ) {
     this.id = id;
-    if (!fs.statSync(path).isDirectory()) throw Error();
+    assert(fs.statSync(path).isDirectory(), `invalid directory: ${path}`);
     this.path = path;
     let items = fs.readdirSync(this.path);
     if (items.includes("color")) {
@@ -94,10 +91,9 @@ class Collection {
     }
     items.forEach((item) => {
       const filePath = nodePath.join(this.path, item);
-      if (!fs.statSync(filePath).isFile()) throw Error(); // TODO: add a better error code
-      if (nodePath.extname(item) === ".ics") {
-        handleICS(fs.readFileSync(filePath).toString(), eventRegistry, taskRegistry);
-      } else throw Error(`unrecognized file extension for ${item}`);
+      assert(fs.statSync(filePath).isFile(), `invalid file: ${filePath}`);
+      assert.strictEqual(nodePath.extname(item), '.ics', `unrecognized file extension: ${item}`)
+      handleICS(fs.readFileSync(filePath).toString(), eventRegistry, taskRegistry);
     });
   }
 }
@@ -109,7 +105,7 @@ export default class VDir {
   collections: Collection[];
 
   constructor(path: string) {
-    if (!fs.statSync(path).isDirectory()) throw Error(); // TODO: add a better error code
+    assert(fs.statSync(path).isDirectory(), `invalid directory: ${path}`);
     this.path = path;
     this.eventRegistry = new Registry();
     this.taskRegistry = new Registry();
