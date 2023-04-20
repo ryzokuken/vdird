@@ -24,16 +24,8 @@ function processComponent(
   eventRegistry: Registry,
   taskRegistry: Registry
 ) {
-  const name = component.name;
   const properties = component.getAllProperties();
-  switch (name) {
-    case "vcalendar":
-      component
-        .getAllSubcomponents()
-        .forEach((c: ICAL.Component) =>
-          processComponent(c, eventRegistry, taskRegistry)
-        );
-      break;
+  switch (component.name) {
     case "vevent":
       eventRegistry.insert(new Item(properties));
       break;
@@ -44,7 +36,7 @@ function processComponent(
       processTimeZone(properties);
       break;
     default:
-      throw Error(`unexpected component: ${name}`);
+      throw Error(`unexpected component: ${component.toString()}`);
   }
 }
 
@@ -59,6 +51,13 @@ function processTimeZone(props: ICAL.Property[]) {
       }
     }
   });
+}
+
+function handleICS(content: string, eventRegistry: Registry, taskRegistry: Registry) {
+  const jCalData = ICAL.parse(content);
+  const component = new ICAL.Component(jCalData as object[]);
+  if (component.name !== 'vcalendar') throw new Error(); // TODO: Replace with asserts
+  component.getAllSubcomponents().forEach(component => processComponent(component, eventRegistry, taskRegistry));
 }
 
 class Collection {
@@ -97,27 +96,23 @@ class Collection {
       const filePath = nodePath.join(this.path, item);
       if (!fs.statSync(filePath).isFile()) throw Error(); // TODO: add a better error code
       if (nodePath.extname(item) === ".ics") {
-        const jCalData = ICAL.parse(
-          fs.readFileSync(filePath).toString()
-        ) as Object[];
-        const component = new ICAL.Component(jCalData);
-        processComponent(component, eventRegistry, taskRegistry);
+        handleICS(fs.readFileSync(filePath).toString(), eventRegistry, taskRegistry);
       } else throw Error(`unrecognized file extension for ${item}`);
     });
   }
 }
 
 export default class VDir {
+  path: string;
   eventRegistry: Registry;
   taskRegistry: Registry;
-  path: string;
   collections: Collection[];
 
   constructor(path: string) {
     if (!fs.statSync(path).isDirectory()) throw Error(); // TODO: add a better error code
+    this.path = path;
     this.eventRegistry = new Registry();
     this.taskRegistry = new Registry();
-    this.path = path;
     this.collections = fs
       .readdirSync(this.path)
       .map(
