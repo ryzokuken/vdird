@@ -7,8 +7,5 @@
         "moduleResolution": "nodenext",
         "strict": true
     },
-    "include": [
-        "src/*",
-        "ical.d.ts"
-    ]
+    "include": ["src/*"]
 }
