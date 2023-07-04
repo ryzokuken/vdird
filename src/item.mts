@@ -21,6 +21,7 @@ function processDate(prop: ICAL.Property) {
 
 export default class Item {
   uid: string;
+  summary: string;
   start: Temporal.ZonedDateTime | Temporal.PlainDate;
   end: Temporal.ZonedDateTime | Temporal.PlainDate;
   raw: object;
@@ -32,6 +33,9 @@ export default class Item {
       switch (prop.name) {
         case "uid":
           this.uid = prop.getFirstValue();
+          break;
+        case "summary":
+          this.summary = prop.getFirstValue();
           break;
         case "dtstart":
           this.start = processDate(prop);
