@@ -16,6 +16,7 @@ const requestListener = function (
   res: http.ServerResponse
 ) {
   res.setHeader("Content-Type", "application/json");
+  res.setHeader("Access-Control-Allow-Origin", "*");
   switch (req.url) {
     case "/":
       res.writeHead(200);
