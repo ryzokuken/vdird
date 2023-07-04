@@ -1,15 +1,13 @@
 import VDir from "./vdir.mjs";
-import http from "http";
+import http from "node:http";
+import { URL } from "node:url";
+
 // import util from "util";
 
 const host = "localhost";
 const port = 8007;
 
 const vdir = new VDir(process.argv[2]);
-//const start = process.argv[3]
-//const end = process.argv[4]
-const start = "2000-01-01";
-const end = "2030-01-01";
 
 const requestListener = function (
   req: http.IncomingMessage,
@@ -17,7 +15,8 @@ const requestListener = function (
 ) {
   res.setHeader("Content-Type", "application/json");
   res.setHeader("Access-Control-Allow-Origin", "*");
-  switch (req.url) {
+  const url = new URL(req.url as string, `http://${req.headers.host}`);
+  switch (url.pathname) {
     case "/":
       res.writeHead(200);
       res.end(JSON.stringify(vdir));
@@ -28,6 +27,8 @@ const requestListener = function (
       break;
     case "/between/":
       res.writeHead(200);
+      const start = url.searchParams.get('start') as string;
+      const end = url.searchParams.get('end') as string;
       res.end(JSON.stringify(vdir.between(start, end)));
       break;
     default:
