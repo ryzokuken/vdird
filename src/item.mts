@@ -8,7 +8,7 @@ function processDate(prop: ICAL.Property) {
     case "date":
       return Temporal.PlainDate.from(value);
     case "date-time":
-      const tz = prop.getParameter("tzid") || "Etc/UTC";
+      const tz = prop.getParameter("tzid") as string || "Etc/UTC";
       try {
         return Temporal.PlainDateTime.from(value).toZonedDateTime(tz);
       } catch {
@@ -29,7 +29,6 @@ export default class Item {
   constructor(props: ICAL.Property[]) {
     this.raw = props;
     props.forEach((prop) => {
-      prop.toString();
       switch (prop.name) {
         case "uid":
           this.uid = prop.getFirstValue();
