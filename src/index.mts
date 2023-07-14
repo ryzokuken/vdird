@@ -2,8 +2,6 @@ import VDir from "./vdir.mjs";
 import http from "node:http";
 import { URL } from "node:url";
 
-// import util from "util";
-
 const host = "localhost";
 const port = 8007;
 
@@ -15,7 +13,7 @@ const requestListener = function (
 ) {
   res.setHeader("Content-Type", "application/json");
   res.setHeader("Access-Control-Allow-Origin", "*");
-  const url = new URL(req.url as string, `http://${req.headers.host}`);
+  const url = new URL(req.url || "", `http://${req.headers.host}`);
   switch (url.pathname) {
     case "/":
       res.writeHead(200);
@@ -27,8 +25,8 @@ const requestListener = function (
       break;
     case "/between/":
       res.writeHead(200);
-      const start = url.searchParams.get('start') as string;
-      const end = url.searchParams.get('end') as string;
+      const start = url.searchParams.get("start") as string;
+      const end = url.searchParams.get("end") as string;
       res.end(JSON.stringify(vdir.between(start, end)));
       break;
     default:
@@ -40,6 +38,4 @@ const requestListener = function (
 const server = http.createServer(requestListener);
 server.listen(port, host, () => {
   console.log(`Server is running on http://${host}:${port}`);
-  //console.log(util.inspect(vdir, { depth: 5 }));
-  //console.log(vdir.between(start, end))
 });
