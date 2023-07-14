@@ -131,14 +131,10 @@ export default class VDir {
 
   between(start: string, end: string) {
     const events = Array.from(this.eventRegistry.data.values()).filter(
-      (event) =>
-        Temporal.Instant.compare((event.end as Temporal.ZonedDateTime).toInstant(), start) === 1 ||
-        Temporal.Instant.compare((event.start as Temporal.ZonedDateTime).toInstant(), end) === -1
+      (event) => event.overlaps(start, end)
     );
-    const tasks = Array.from(this.taskRegistry.data.values()).filter(
-      (task) =>
-        Temporal.Instant.compare((task.end as Temporal.ZonedDateTime).toInstant(), start) === 1 ||
-        Temporal.Instant.compare((task.start as Temporal.ZonedDateTime).toInstant(), end) === -1
+    const tasks = Array.from(this.taskRegistry.data.values()).filter((task) =>
+      task.overlaps(start, end)
     );
     return { events, tasks };
   }
