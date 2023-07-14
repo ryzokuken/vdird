@@ -15,7 +15,7 @@ class Registry {
   }
 
   insert(item: Item) {
-    assert(item.uid, 'item has no uid');
+    assert(item.uid, "item has no uid");
     this.data.set(item.uid, item);
   }
 }
@@ -24,7 +24,7 @@ function processComponent(
   component: ICAL.Component,
   eventRegistry: Registry,
   taskRegistry: Registry
-) {
+): void {
   const properties = component.getAllProperties();
   switch (component.name) {
     case "vevent":
@@ -45,16 +45,31 @@ function processTimeZone(props: ICAL.Property[]) {
   props.forEach((prop) => {
     const value = prop.getFirstValue();
     if (prop.name === "tzid") {
-      assert.doesNotThrow(() => new Temporal.TimeZone(value), `invalid tzid: ${value}`)
+      assert.doesNotThrow(
+        () => new Temporal.TimeZone(value),
+        `invalid tzid: ${value}`
+      );
     }
   });
 }
 
-function handleICS(content: string, eventRegistry: Registry, taskRegistry: Registry) {
-  const jCalData = ICAL.parse(content);
-  const component = new ICAL.Component(jCalData as object[]);
-  assert.strictEqual(component.name, 'vcalendar', 'top level component must be "vcalendar"');
-  component.getAllSubcomponents().forEach(component => processComponent(component, eventRegistry, taskRegistry));
+function handleICS(
+  content: string,
+  eventRegistry: Registry,
+  taskRegistry: Registry
+): void {
+  const jCalData = ICAL.parse(content) as [];
+  const component = new ICAL.Component(jCalData);
+  assert.strictEqual(
+    component.name,
+    "vcalendar",
+    'top level component must be "vcalendar"'
+  );
+  component
+    .getAllSubcomponents()
+    .forEach((component) =>
+      processComponent(component, eventRegistry, taskRegistry)
+    );
 }
 
 class Collection {
@@ -92,8 +107,16 @@ class Collection {
     items.forEach((item) => {
       const filePath = nodePath.join(this.path, item);
       assert(fs.statSync(filePath).isFile(), `invalid file: ${filePath}`);
-      assert.strictEqual(nodePath.extname(item), '.ics', `unrecognized file extension: ${item}`)
-      handleICS(fs.readFileSync(filePath).toString(), eventRegistry, taskRegistry);
+      assert.strictEqual(
+        nodePath.extname(item),
+        ".ics",
+        `unrecognized file extension: ${item}`
+      );
+      handleICS(
+        fs.readFileSync(filePath).toString(),
+        eventRegistry,
+        taskRegistry
+      );
     });
   }
 }
