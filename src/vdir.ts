@@ -1,11 +1,11 @@
-import fs from "fs";
-import nodePath from "path";
-import assert from "assert";
+import fs from "node:fs";
+import nodePath from "node:path";
+import assert from "node:assert";
 
 import ICAL from "ical.js";
 import { Temporal } from "@js-temporal/polyfill";
 
-import Item from "./item.mjs";
+import Item from "./item.ts";
 
 class Registry {
   data: Map<string, Item>;

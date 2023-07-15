@@ -1,15 +1,15 @@
-import VDir from "./vdir.mjs";
+import VDir from "./vdir.ts";
 import http from "node:http";
 import { URL } from "node:url";
 
 const host = "localhost";
 const port = 8007;
 
-const vdir = new VDir(process.argv[2]);
+const vdir = new VDir(Deno.args[0]);
 
 const requestListener = function (
   req: http.IncomingMessage,
-  res: http.ServerResponse
+  res: http.ServerResponse,
 ) {
   res.setHeader("Content-Type", "application/json");
   res.setHeader("Access-Control-Allow-Origin", "*");

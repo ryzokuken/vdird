@@ -1,0 +1,24 @@
+{
+  "version": "2",
+  "remote": {
+    "https://cdn.skypack.dev/-/@js-temporal/polyfill@v0.4.4-s7vm07onMl94mN5NeZkC/dist=es2019,mode=imports/optimized/@js-temporal/polyfill.js": "2e59dd4424f2ee643eb440774f229c5f134fceaf14debe8a668c81986592f97f",
+    "https://cdn.skypack.dev/-/jsbi@v4.3.0-kIZpnz2AdjvBEZ3y3wsD/dist=es2019,mode=imports/optimized/jsbi.js": "2c4509126fe051032b527ee90fda3c162880383476f40cf95fecc9c76f2ec9c0",
+    "https://cdn.skypack.dev/@js-temporal/polyfill@0.4.4": "0e7ce6d9cd81f80270ffa1f9114b7e02328f43c4798de6913863da157dcfd6c6"
+  },
+  "npm": {
+    "specifiers": {
+      "@types/node": "@types/node@18.16.19",
+      "ical.js": "ical.js@1.5.0"
+    },
+    "packages": {
+      "@types/node@18.16.19": {
+        "integrity": "sha512-IXl7o+R9iti9eBW4Wg2hx1xQDig183jj7YLn8F7udNceyfkbn1ZxmzZXuak20gR40D7pIkIY1kYGx5VIGbaHKA==",
+        "dependencies": {}
+      },
+      "ical.js@1.5.0": {
+        "integrity": "sha512-7ZxMkogUkkaCx810yp0ZGKvq1ZpRgJeornPttpoxe6nYZ3NLesZe1wWMXDdwTkj/b5NtXT+Y16Aakph/ao98ZQ==",
+        "dependencies": {}
+      }
+    }
+  }
+}

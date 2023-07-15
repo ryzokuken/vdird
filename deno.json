@@ -1,0 +1,9 @@
+{
+  "imports": {
+    "@js-temporal/polyfill": "https://cdn.skypack.dev/@js-temporal/polyfill@0.4.4",
+    "ical.js": "npm:ical.js"
+  },
+  "tasks": {
+    "run": "deno run --allow-read=$HOME/.calendars/disroot --allow-net src/index.ts $HOME/.calendars/disroot"
+  }
+}
