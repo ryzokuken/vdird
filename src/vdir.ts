@@ -2,6 +2,7 @@ import fs from "node:fs";
 import nodePath from "node:path";
 import assert from "node:assert";
 
+// @deno-types="./ical.d.ts"
 import ICAL from "ical.js";
 import { Temporal } from "@js-temporal/polyfill";
 
@@ -23,7 +24,7 @@ class Registry {
 function processComponent(
   component: ICAL.Component,
   eventRegistry: Registry,
-  taskRegistry: Registry
+  taskRegistry: Registry,
 ): void {
   const properties = component.getAllProperties();
   switch (component.name) {
@@ -47,7 +48,7 @@ function processTimeZone(props: ICAL.Property[]) {
     if (prop.name === "tzid") {
       assert.doesNotThrow(
         () => new Temporal.TimeZone(value),
-        `invalid tzid: ${value}`
+        `invalid tzid: ${value}`,
       );
     }
   });
@@ -56,14 +57,14 @@ function processTimeZone(props: ICAL.Property[]) {
 function handleICS(
   content: string,
   eventRegistry: Registry,
-  taskRegistry: Registry
+  taskRegistry: Registry,
 ): void {
   const jCalData = ICAL.parse(content) as [];
   const component = new ICAL.Component(jCalData);
   assert.strictEqual(
     component.name,
     "vcalendar",
-    'top level component must be "vcalendar"'
+    'top level component must be "vcalendar"',
   );
   component
     .getAllSubcomponents()
@@ -82,7 +83,7 @@ class Collection {
     id: string,
     path: string,
     eventRegistry: Registry,
-    taskRegistry: Registry
+    taskRegistry: Registry,
   ) {
     this.id = id;
     assert(fs.statSync(path).isDirectory(), `invalid directory: ${path}`);
@@ -110,12 +111,12 @@ class Collection {
       assert.strictEqual(
         nodePath.extname(item),
         ".ics",
-        `unrecognized file extension: ${item}`
+        `unrecognized file extension: ${item}`,
       );
       handleICS(
         fs.readFileSync(filePath).toString(),
         eventRegistry,
-        taskRegistry
+        taskRegistry,
       );
     });
   }
@@ -140,8 +141,8 @@ export default class VDir {
             collection,
             nodePath.join(this.path, collection),
             this.eventRegistry,
-            this.taskRegistry
-          )
+            this.taskRegistry,
+          ),
       );
   }
 
@@ -154,7 +155,7 @@ export default class VDir {
 
   between(start: string, end: string) {
     const events = Array.from(this.eventRegistry.data.values()).filter(
-      (event) => event.overlaps(start, end)
+      (event) => event.overlaps(start, end),
     );
     const tasks = Array.from(this.taskRegistry.data.values()).filter((task) =>
       task.overlaps(start, end)

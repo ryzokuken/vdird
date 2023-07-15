@@ -23,12 +23,13 @@ const requestListener = function (
       res.writeHead(200);
       res.end(JSON.stringify(vdir.all()));
       break;
-    case "/between/":
+    case "/between/": {
       res.writeHead(200);
       const start = url.searchParams.get("start") as string;
       const end = url.searchParams.get("end") as string;
       res.end(JSON.stringify(vdir.between(start, end)));
       break;
+    }
     default:
       res.writeHead(404);
       res.end(JSON.stringify({ error: "not found" }));
