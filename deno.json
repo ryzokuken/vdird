@@ -1,6 +1,6 @@
 {
   "imports": {
-    "@js-temporal/polyfill": "https://cdn.skypack.dev/@js-temporal/polyfill@0.4.4",
+    "@js-temporal/polyfill": "npm:@js-temporal/polyfill@0.4.4",
     "ical.js": "npm:ical.js"
   },
   "tasks": {
